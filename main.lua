@@ -1,6 +1,9 @@
 require("Drawable")
 require("InfoTable")
 
+step = 1
+mode = "none"
+
 count = 0
 
 dialog_list_totle = {"Hello, I am Aristotle!", "I tutored Alexander the Great!"}
@@ -20,8 +23,25 @@ dialog_list_arce = {"test speech", "lorem ipsum", "dolet", "test"}
 loading_screen = true
 plato_screen = false
 
-function love.keypressed(key)
-	--print(key)
+function love.keypressed(key, unicode)
+	if optionmenu and ((unicode >= 48 and unicode <= 57) or (unicode==61 or unicode==45)) then
+		if subtractstep and (unicode >= 48 and unicode <= 57) then
+			step = step-key				
+		elseif addstep and (unicode >= 48 and unicode <= 57) then
+			step = step+math.abs(key)
+		end
+	
+		if key=="=" then
+			mode = "addition"
+			addstep = true
+			subtractstep = false
+		elseif key=="-" then
+			mode = "subtraction"
+			subtractstep = true
+			addstep = false
+		end
+	
+	end
 	if key=="w" or key=="up" then
 		moveup()
 	elseif key=="s" or key=="down" then
@@ -45,23 +65,28 @@ function love.keypressed(key)
 	elseif key=="n" then
 		love.audio.play(love.audio.newSource("aoeIII.mp3"))
 	elseif key=="r" then
+		step = 1
 		loading_screen = true
-		speaking_crates = false
-		speaking_totle = false
-		dialog_totle = 0
-		dialog_crates = 0
+		for i = 1, table.getn(drawables) do
+			drawables[i].talk = false
+			drawables[i].dialog_index = 0
+		end		
 		dialog_plato = 1
 		plato_screen = false
 	elseif key=="q" then
-		love.event.push("quit")
-	
+		love.event.push("quit")	
 	else
 		todrawplayer = player_standing
 	end
 end
 
 function love.load()
+	plato_mugshot = love.graphics.newImage("info/plato.jpg")
 	--love.audio.play(love.audio.newSource("aoeIII.mp3"))
+	
+	ball = Drawable.create(400, 300, "bouncy ball")
+	ball.destx = 0
+	ball.desty = 0
 	
 	aristotle = Drawable.create(60, 250, "aristotle")
 
@@ -101,7 +126,6 @@ function love.load()
 	background:loadAnimDef("background/background.png")
 	
 	drawables = {aristotle, speusippus, arcesilau, player}
-	loadinfopics()
 	
 	infoAristotle = InfoTable.create()
 	infoAristotle:addMugshot("info/totle.png")
@@ -128,23 +152,74 @@ end
 
 function love.update(dt)
 	if love.keyboard.isDown("w") or love.keyboard.isDown("up") then
-		player:chgy(-1)
+		player:chgy(-step)
 	elseif love.keyboard.isDown("a") or love.keyboard.isDown("left") then
-		player:chgx(-1)
+		player:chgx(-step)
 	elseif love.keyboard.isDown("s") or love.keyboard.isDown("down") then
-		player:chgy(1)
+		player:chgy(step)
 	elseif love.keyboard.isDown("d") or love.keyboard.isDown("right") then
-		player:chgx(1)
+		player:chgx(step)
 	else
 		todrawplayer = player_default
 	end
 end
 
+--[[function love.focus(f)
+	if f then
+		--print("Lose or gain")
+	end
+end--]]
+
 function love.draw()
+	if optionmenu then
+		love.graphics.print("Adjust movement speed: "..step, 0, 0)
+		love.graphics.print("Currently in "..mode.." mode", 20, 20)
+		
+		--instructions
+		love.graphics.print("Use the WASD or the arrow keys to move around, and use the space bar to talk", 200, 200)
+		love.graphics.print("To change movement speed choose a mode; subtraction (- key) or addition (+ key)", 200, 215)
+		love.graphics.print("Then press the number that you want to add (or subtract) to the current speed", 200, 230)
+		
+		love.graphics.print("Press \"r\" to reset the game or \"q\" to quit", 250, 245)
+		
+		love.graphics.setColor(0, 0, 230)
+		love.graphics.circle("fill", ball.x, ball.y, 40)
+		for i = 1, step do
+			love.graphics.setColor(math.random(0,255), math.random(0,255), math.random(0,255))
+			love.graphics.line(ball.x+math.random(0, 100), ball.y+math.random(0,100), ball.destx, ball.desty)
+			love.graphics.setColor(math.random(0,255), math.random(0,255), math.random(0,255))
+			love.graphics.line(ball.x-math.random(0, 100), ball.y+math.random(0,100), ball.destx, ball.desty)
+			love.graphics.setColor(math.random(0,255), math.random(0,255), math.random(0,255))
+			love.graphics.line(ball.x-math.random(0, 100), ball.y-math.random(0,100), ball.destx, ball.desty)
+			love.graphics.setColor(math.random(0,255), math.random(0,255), math.random(0,255))
+			love.graphics.line(ball.x+math.random(0, 100), ball.y-math.random(0,100), ball.destx, ball.desty)
+		end
+		love.graphics.circle("fill", ball.destx, ball.desty, 10)
+		
+		if ball.x == ball.destx and ball.y == ball.desty then
+			ball.destx = math.random(0, 800)
+			ball.desty = math.random(0, 600)
+		else
+			if ball.x < ball.destx then
+				ball.x = ball.x + 1
+			end
+			if ball.y < ball.desty then
+				ball.y = ball.y + 1
+			end
+			if ball.x > ball.destx then
+				ball.x = ball.x - 1
+			end
+			if ball.y > ball.desty then
+				ball.y = ball.y - 1
+			end			
+		end
+		love.graphics.setColor(255, 255, 255)
+		return
+	end
+	
 	love.graphics.draw(background.default, background.x, background.y)
 	love.graphics.rectangle("line", 0, 500, 800, 100)
 	love.graphics.rectangle("line", 5, 505, 790, 90)
-	--Drawing the FPS in the upper left hand corner
 	love.graphics.print("FPS: "..tostring(love.timer.getFPS()), 10, 10)
 	
 	if loading_screen then			
@@ -164,8 +239,7 @@ function love.draw()
 		love.graphics.circle("line", 400, 250, 100)
 		love.graphics.circle("fill", 400, 250, 95)
 		drawInfoPlato()		
-		speak(dialog_list_plato[dialog_plato])
-		
+		speak(dialog_list_plato[dialog_plato])		
 	end
 	
 	if aristotle.talk then
@@ -197,30 +271,32 @@ function love.draw()
 	
 	if not loading_screen then
 		for i = 1, table.getn(drawables) do
+			--print(drawables[i].name)
 			love.graphics.draw(drawables[i].draw, drawables[i].x, drawables[i].y)
 		end	
 	end
 	
-	player:toggle("stand")
+	player:toggle("stand")	
+	
 end
 
 function moveup()
-	player:chgy(1)
+	player:chgy(step)
 	player.draw = player.walkup
 end
 
 function movedown()
-	player:chgy(-1)
+	player:chgy(-step)
 	player.draw = player.walkdown
 end
 
 function moveleft()
-	player:chgx(1)
+	player:chgx(step)
 	player.draw = player.walkhorizon
 end
 
 function moveright()
-	player:chgx(-1)
+	player:chgx(-step)
 	player.draw = player.walkhorizon
 end
 
@@ -262,16 +338,15 @@ function tryspeak()
 end
 
 function options()
-	optionmenu = true
+	if optionmenu then
+		optionmenu = false
+	else
+		optionmenu = true
+	end
 end
 
 function speak(dialog)
 	love.graphics.print(dialog, 10, 510)
-end
-
-function loadinfopics()
-	local dir = "info/"
-	plato_mugshot = love.graphics.newImage(dir.."plato.jpg")
 end
 
 function drawInfoPlato()
