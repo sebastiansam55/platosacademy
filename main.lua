@@ -2,6 +2,7 @@ require("Drawable")
 require("InfoTable")
 
 step = 1
+fidgetdelay = 100
 mode = "none"
 
 count = 0
@@ -185,6 +186,11 @@ end
 end--]]
 
 function love.draw()
+	count=count+1
+	if count>=9999999999 then
+		count = 0
+	end
+
 	if optionmenu then
 		love.graphics.print("Adjust movement speed: "..step, 0, 0)
 		love.graphics.print("Currently in "..mode.." mode", 20, 20)
@@ -238,17 +244,14 @@ function love.draw()
 	
 	if loading_screen then			
 		love.graphics.draw(title.draw, title.x, title.y)
-		count=count+1
+		
 		if title.y ~= 100 and count%2==1 then
 			title.y = title.y+1
 		elseif title.y==100 and not (count%10==1) then
 			love.graphics.setFont(talkfont)
 			love.graphics.print("Press space to contiune", 170, 200, 0)
 			love.graphics.setFont(oldefont) 
-		end		
-		if count>=9999999999 then
-			count = 0
-		end
+		end			
 	end
 	
 	if plato_screen then
@@ -269,7 +272,9 @@ function love.draw()
 		end	
 	end
 	
-	player:toggle("stand")	
+	if count%100 == 0 then
+		player:toggle("stand")
+	end
 	
 end
 
@@ -351,9 +356,11 @@ end
 function talkfidgettoggle(drawable, infotable)
 	if drawable.talk then
 		infotable:drawInfo()
-		drawable:toggle("talk")
+		if count%fidgetdelay==0 then
+			drawable:toggle("talk")
+		end
 		speak(drawable.dialog[drawable.dialog_index])
-	else
+	elseif count%fidgetdelay==0 then
 		drawable:toggle("stand")
 	end
 
