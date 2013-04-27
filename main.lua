@@ -6,7 +6,13 @@ mode = "none"
 
 count = 0
 
-dialog_list_totle = {"Hello, I am Aristotle!", "I tutored Alexander the Great!"}
+dialog_list_totle = {"Hello, I am Aristotle!", "I tutored Alexander the Great!", "He who has overcome his fears will truly be free",
+"Misfortune shows those who are not really friends",
+"Without friends no one would choose to live, though he had all other goods",
+"Man is by nature a polictial animal",
+"Nature does nothing uselessly",
+"They should rule who are able to rule best"
+}
 
 dialog_plato = 1
 dialog_list_plato = {
@@ -17,8 +23,11 @@ dialog_list_plato = {
 "Have fun!"
 }
 
-dialog_list_speu = {"test speech", "lorem ipsum", "dolet", "test"}
-dialog_list_arce = {"test speech", "lorem ipsum", "dolet", "test"}
+dialog_list_speu = {"Hello, I am Speusippus!", "I was the first head of the academy after Plato",
+
+}
+dialog_list_arce = {"Hello, I am Arcesilaus!", 
+"Where you find the laws most numerous, there you will find also the greatest injustice", "dolet", "test"}
 
 loading_screen = true
 plato_screen = false
@@ -81,6 +90,11 @@ function love.keypressed(key, unicode)
 end
 
 function love.load()
+	
+	oldefont = love.graphics.newFont("roman.ttf", 20)
+	talkfont = love.graphics.newFont("roman.ttf", 30)
+	love.graphics.setFont( oldefont )
+
 	plato_mugshot = love.graphics.newImage("info/plato.jpg")
 	--love.audio.play(love.audio.newSource("aoeIII.mp3"))
 	
@@ -176,11 +190,11 @@ function love.draw()
 		love.graphics.print("Currently in "..mode.." mode", 20, 20)
 		
 		--instructions
-		love.graphics.print("Use the WASD or the arrow keys to move around, and use the space bar to talk", 200, 200)
-		love.graphics.print("To change movement speed choose a mode; subtraction (- key) or addition (+ key)", 200, 215)
-		love.graphics.print("Then press the number that you want to add (or subtract) to the current speed", 200, 230)
+		love.graphics.print("Use the WASD or the arrow keys to move around, and use the space bar to talk", 150, 200)
+		love.graphics.print("To change movement speed choose a mode; subtraction (- key) or addition (+ key)", 150, 215)
+		love.graphics.print("Then press the number that you want to add (or subtract) to the current speed", 150, 230)
 		
-		love.graphics.print("Press \"r\" to reset the game or \"q\" to quit", 250, 245)
+		love.graphics.print("Press \"r\" to reset the game or \"q\" to quit", 200, 245)
 		
 		love.graphics.setColor(0, 0, 230)
 		love.graphics.circle("fill", ball.x, ball.y, 40)
@@ -228,7 +242,9 @@ function love.draw()
 		if title.y ~= 100 and count%2==1 then
 			title.y = title.y+1
 		elseif title.y==100 and not (count%10==1) then
-			love.graphics.print("Press space to contiune", 170, 200, 0, 2, 2)
+			love.graphics.setFont(talkfont)
+			love.graphics.print("Press space to contiune", 170, 200, 0)
+			love.graphics.setFont(oldefont) 
 		end		
 		if count>=9999999999 then
 			count = 0
@@ -242,32 +258,9 @@ function love.draw()
 		speak(dialog_list_plato[dialog_plato])		
 	end
 	
-	if aristotle.talk then
-		infoAristotle:drawInfo()
-		aristotle:toggle("talk")
-		speak(aristotle.dialog[aristotle.dialog_index])
-	else
-		aristotle:toggle("stand")
-	end
-	
-	
-	if arcesilau.talk then
-		infoArcesilau:drawInfo()
-		arcesilau:toggle("talk")
-		speak(arcesilau.dialog[arcesilau.dialog_index])
-	else
-		arcesilau:toggle("stand")
-	end
-	
-	
-	if speusippus.talk then
-		infoSpeusippus:drawInfo()
-		speusippus:toggle("talk")
-		speak(speusippus.dialog[speusippus.dialog_index])
-	else
-		speusippus:toggle("stand")
-	end
-	
+	talkfidgettoggle(aristotle, infoAristotle)
+	talkfidgettoggle(arcesilau, infoArcesilau)
+	talkfidgettoggle(speusippus, infoSpeusippus)	
 	
 	if not loading_screen then
 		for i = 1, table.getn(drawables) do
@@ -346,9 +339,22 @@ function options()
 end
 
 function speak(dialog)
-	love.graphics.print(dialog, 10, 510)
+	love.graphics.setFont(talkfont)
+	love.graphics.printf(dialog, 10, 510, 700, "center")
+	love.graphics.setFont(oldefont)
 end
 
 function drawInfoPlato()
 	love.graphics.draw(plato_mugshot, 338, 179, 0, .5, .5)
+end
+
+function talkfidgettoggle(drawable, infotable)
+	if drawable.talk then
+		infotable:drawInfo()
+		drawable:toggle("talk")
+		speak(drawable.dialog[drawable.dialog_index])
+	else
+		drawable:toggle("stand")
+	end
+
 end

@@ -19,7 +19,7 @@ end
 function InfoTable:drawInfo()
 	drawTemplate()
 	love.graphics.draw(self.mugshot, 365, 190)
-	love.graphics.print(self.name, 495, 170)
+	love.graphics.print(self.name, 480, 170)
 	love.graphics.print(self.yob, 474, 200)
 	love.graphics.print(self.city, 474, 235)
 	love.graphics.print(self.dod, 474, 270)
