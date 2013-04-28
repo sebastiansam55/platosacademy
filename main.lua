@@ -7,6 +7,7 @@ mode = "none"
 
 keycount = 0
 count = 0
+konamicount = 1
 
 keyhist = {}
 
@@ -31,7 +32,9 @@ dialog_list_speu = {"Hello, I am Speusippus!", "I was the first head of the acad
 
 }
 dialog_list_arce = {"Hello, I am Arcesilaus!", 
-"Where you find the laws most numerous, there you will find also the greatest injustice", "dolet", "test"}
+"Where you find the laws most numerous, there you will find also the greatest injustice", " ", "test"}
+
+dance_moves_player = {love.graphics.newImage("player/dance/dance1.png"), love.graphics.newImage("player/dance/dance2.png"), love.graphics.newImage("player/dance/dance3.png")}
 
 loading_screen = true
 plato_screen = false
@@ -50,6 +53,7 @@ function love.keypressed(key, unicode)
 	end
 	if equalTable(keyhist, {"up", "up", "down",  "down",  "left",  "right", "left", "right", "b", "a"}) then
 		print("Konami code activated!")
+		konamicode = true
 	end
 	if optionmenu and ((unicode >= 48 and unicode <= 57) or (unicode==61 or unicode==45)) then
 		if subtractstep and (unicode >= 48 and unicode <= 57) then
@@ -77,6 +81,12 @@ function love.keypressed(key, unicode)
 		moveleft()
 	elseif key=="d" or key=="right" then
 		moveright()
+	elseif key=="k" then
+		if konamicode then
+			konamicode = false
+		else
+			konamicode = true
+		end
 	elseif key==" " then
 		if loading_screen then
 			loading_screen = false
@@ -102,8 +112,6 @@ function love.keypressed(key, unicode)
 		plato_screen = false
 	elseif key=="q" then
 		love.event.push("quit")	
-	else
-		todrawplayer = player_standing
 	end
 end
 
@@ -113,7 +121,7 @@ function love.load()
 	talkfont = love.graphics.newFont("roman.ttf", 30)
 	love.graphics.setFont( oldefont )
 
-	plato_mugshot = love.graphics.newImage("info/plato.jpg")
+	plato_mugshot = love.graphics.newImage("info/plato.png")
 	--love.audio.play(love.audio.newSource("aoeIII.mp3"))
 	
 	ball = Drawable.create(400, 300, "bouncy ball")
@@ -185,11 +193,14 @@ function love.load()
 	infoArcesilau:addDeathYear("241 BC")
 	
 	
+	--sebastiansam55 = CreditInfo.create(200, 250, ")
+	
 end
 
 function love.update(dt)
+
 	if love.keyboard.isDown("w") or love.keyboard.isDown("up") then
-		
+		player.draw = player.walkup
 		player:chgy(-step)
 	elseif love.keyboard.isDown("a") or love.keyboard.isDown("left") then
 		if count%50==0 then
@@ -204,6 +215,15 @@ function love.update(dt)
 			player:walktoggle("right")
 		end
 		player:chgx(step)
+	end
+	
+	if konamicode and count%50 == 0 then
+		player.draw = dance_moves_player[konamicount]
+		if konamicount >= 3 then
+			konamicount = 1
+		else
+			konamicount = konamicount+1
+		end
 	end
 end
 
@@ -307,7 +327,7 @@ end
 
 function movedown()
 	player:chgy(-step)
-	player.draw = player.walkdown
+	--player.draw = player.walkdown
 end
 
 function moveleft()
@@ -372,7 +392,7 @@ function speak(dialog)
 end
 
 function drawInfoPlato()
-	love.graphics.draw(plato_mugshot, 338, 179, 0, .5, .5)
+	love.graphics.draw(plato_mugshot, 305, 155)
 end
 
 function talkfidgettoggle(drawable, infotable)
