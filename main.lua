@@ -5,7 +5,10 @@ step = 1
 fidgetdelay = 100
 mode = "none"
 
+keycount = 0
 count = 0
+
+keyhist = {}
 
 dialog_list_totle = {"Hello, I am Aristotle!", "I tutored Alexander the Great!", "He who has overcome his fears will truly be free",
 "Misfortune shows those who are not really friends",
@@ -34,6 +37,20 @@ loading_screen = true
 plato_screen = false
 
 function love.keypressed(key, unicode)
+	keycount = keycount + 1
+	keyhist[keycount] = key
+	--print(keycount)
+	--print(keyhist[keycount])
+	if keycount>=10 then
+		for i = 1, #keyhist do
+			--io.write(keyhist[i]..", ")
+		end
+		--io.write("\n")
+		keycount = 0
+	end
+	if equalTable(keyhist, {"up", "up", "down",  "down",  "left",  "right", "left", "right", "b", "a"}) then
+		print("Konami code activated!")
+	end
 	if optionmenu and ((unicode >= 48 and unicode <= 57) or (unicode==61 or unicode==45)) then
 		if subtractstep and (unicode >= 48 and unicode <= 57) then
 			step = step-key				
@@ -119,7 +136,7 @@ function love.load()
 	
 	arcesilau = Drawable.create(700, 250, "Arcesilau")
 	
-	arcesilau:addDialog(dialog_list_arce)
+	arcesilau:addDialog(dialog_list_arce) 
 	arcesilau:loadAnimStand("arce/arceStand.png")
 	arcesilau:loadAnimTalk("arce/arceTalk.png")
 	arcesilau:loadAnimFidget("arce/arceFidget.png")
@@ -131,8 +148,12 @@ function love.load()
 	player:loadAnimTalk("player/playerTalking.png")
 	player:loadAnimWalkUp("player/playerWalkUp.png")
 	player:loadAnimWalkDown("player/playerWalkDown.png")
-	player:loadAnimWalkLeftRight("player/playerWalkLeftRight.png")
+	player:loadAnimWalkLeft("player/playerWalkLeft.png")
+	player:loadAnimWalkRight("player/playerWalkRight.png")
+	player:loadAnimWalkLeftFid("player/playerWalkLeftB.png")
+	player:loadAnimWalkRightFid("player/playerWalkRightB.png")
 	player.stand = true
+	player.curWalking = false
 	
 	title = Drawable.create(100, 0, "title")
 	title:loadAnimDef("title/title.png")
@@ -163,27 +184,28 @@ function love.load()
 	infoArcesilau:addBirthCity("Pitane")
 	infoArcesilau:addDeathYear("241 BC")
 	
+	
 end
 
 function love.update(dt)
 	if love.keyboard.isDown("w") or love.keyboard.isDown("up") then
+		
 		player:chgy(-step)
 	elseif love.keyboard.isDown("a") or love.keyboard.isDown("left") then
+		if count%50==0 then
+			player:walktoggle("left")
+		end
 		player:chgx(-step)
 	elseif love.keyboard.isDown("s") or love.keyboard.isDown("down") then
+		
 		player:chgy(step)
 	elseif love.keyboard.isDown("d") or love.keyboard.isDown("right") then
+		if count%50==0 then
+			player:walktoggle("right")
+		end
 		player:chgx(step)
-	else
-		todrawplayer = player_default
 	end
 end
-
---[[function love.focus(f)
-	if f then
-		--print("Lose or gain")
-	end
-end--]]
 
 function love.draw()
 	count=count+1
@@ -266,7 +288,7 @@ function love.draw()
 	talkfidgettoggle(speusippus, infoSpeusippus)	
 	
 	if not loading_screen then
-		for i = 1, table.getn(drawables) do
+		for i = 1, #drawables do
 			--print(drawables[i].name)
 			love.graphics.draw(drawables[i].draw, drawables[i].x, drawables[i].y)
 		end	
@@ -290,18 +312,18 @@ end
 
 function moveleft()
 	player:chgx(step)
-	player.draw = player.walkhorizon
+	player.draw = player.walkleft
 end
 
 function moveright()
 	player:chgx(-step)
-	player.draw = player.walkhorizon
+	player.draw = player.walkright
 end
 
 function tryspeak()
 	--speusippus
 	if plato_screen then
-		if dialog_plato < table.getn(dialog_list_plato) then
+		if dialog_plato < #dialog_list_plato then
 			dialog_plato = dialog_plato+1
 		else
 			plato_screen = false
@@ -311,7 +333,7 @@ function tryspeak()
 		arcesilau.talk = false
 		aristotle.talk = false
 		plato_screen = false
-		if speusippus.dialog_index < table.getn(speusippus.dialog) then
+		if speusippus.dialog_index < #speusippus.dialog then
 			speusippus.dialog_index = speusippus.dialog_index+1
 		end
 	--for totle, in the left part
@@ -320,7 +342,7 @@ function tryspeak()
 		arcesilau.talk = false
 		plato_screen = false
 		aristotle.talk = true
-		if aristotle.dialog_index < table.getn(aristotle.dialog) then
+		if aristotle.dialog_index < #aristotle.dialog then
 			aristotle.dialog_index = aristotle.dialog_index+1
 		end
 	--arcesilau
@@ -329,7 +351,7 @@ function tryspeak()
 		arcesilau.talk = true
 		aristotle.talk = false
 		plato_screen = false
-		if arcesilau.dialog_index < table.getn(arcesilau.dialog) then
+		if arcesilau.dialog_index < #arcesilau.dialog then
 			arcesilau.dialog_index = arcesilau.dialog_index + 1
 		end
 	end
@@ -364,4 +386,19 @@ function talkfidgettoggle(drawable, infotable)
 		drawable:toggle("stand")
 	end
 
+end
+
+function equalTable(t1, t2)
+	if #t1==#t2 then
+		for i = 1, #t1 do
+			if t1[i] == t2[i] then
+				
+			else
+				return false
+			end
+		end
+		return true
+	else
+		return false
+	end	 
 end

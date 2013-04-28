@@ -45,12 +45,24 @@ function Drawable:loadAnimWalkUp(filedir)
 	self.walkup = love.graphics.newImage(filedir)
 end
 
-function Drawable:loadAnimWalkLeftRight(filedir)
-	self.walkhorizon = love.graphics.newImage(filedir)
+function Drawable:loadAnimWalkLeft(filedir)
+	self.walkleft = love.graphics.newImage(filedir)
+end
+
+function Drawable:loadAnimWalkRight(filedir)
+	self.walkright = love.graphics.newImage(filedir)
 end
 
 function Drawable:loadAnimWalkDown(filedir)
 	self.walkdown = love.graphics.newImage(filedir)
+end
+
+function Drawable:loadAnimWalkLeftFid(filedir)
+	self.walkleftfid = love.graphics.newImage(filedir)
+end
+
+function Drawable:loadAnimWalkRightFid(filedir)
+	self.walkrightfid = love.graphics.newImage(filedir)
 end
 
 function Drawable:reset()
@@ -78,8 +90,7 @@ function Drawable:toggle(which)
 			self.curTalking = true
 			self.draw = self.talking
 		end
-	end
-		
+	end		
 end
 
 
@@ -105,6 +116,31 @@ function Drawable:chgy(num)
 	else
 		self.y = self.y + num
 	end
+end
+
+function Drawable:walktoggle(dir)
+	if dir == "left" then
+		if self.curWalking then
+			self.curWalking = false
+			self.draw = self.walkleftfid
+		else
+			self.curWalking = true
+			self.draw = self.walkleft
+		end
+	elseif dir == "right" then
+		if self.curWalking then
+			self.curWalking = false
+			self.draw = self.walkrightfid
+		else
+			self.curWalking = true
+			self.draw = self.walkright
+		end
+	elseif dir == "up" then
+	
+	elseif dir == "down" then
+	
+	end
+
 end
 
 function Drawable.create(x,y, name)
