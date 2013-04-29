@@ -1,5 +1,6 @@
 require("Drawable")
 require("InfoTable")
+--require("CreditItem")
 
 step = 1
 fidgetdelay = 100
@@ -10,6 +11,9 @@ count = 0
 konamicount = 1
 
 keyhist = {}
+
+sound = false
+
 
 dialog_list_totle = {"Hello, I am Aristotle!", "I tutored Alexander the Great!", "He who has overcome his fears will truly be free",
 "Misfortune shows those who are not really friends",
@@ -28,11 +32,19 @@ dialog_list_plato = {
 "Have fun!"
 }
 
-dialog_list_speu = {"Hello, I am Speusippus!", "I was the first head of the academy after Plato",
-
+dialog_list_speu = {"Hello traveler, I am the  great philosopher Speusippus.",
+"I studied at Plato’s Academy in what is known as the ‘Old Academy,’ around the yeah 340 BC",
+"I was the first successor to Plato after his death to become the ‘scholarch’ of The Academy and led for 8 years.",
+"During my time there, I studied many different subjects such as Metaphysics and Ethics",
+"I believe happiness to be a state that is complete in those things that are in accordance with nature, a condition desired by all human beings, while the good aim at freedom from disturbance; and the virtues would be productive of happiness.",
+"That’s all I have to say, keep exploring to see what else you can learn here!"
 }
-dialog_list_arce = {"Hello, I am Arcesilaus!", 
-"Where you find the laws most numerous, there you will find also the greatest injustice", " ", "test"}
+dialog_list_arce = {"Hello there, I am the philosopher Arcesilaus.",
+"I attended The Academy in the time known as the Middle Academy, around the year 266 BC",
+"Although I did not record my works in writing, I still left the Academy with many unique beliefs and discoveries.",
+"One of which is what is known as ‘philosophical skepticism,’ which is the doubtfulness of discovering truth in the world through the human senses.",
+"What do you think? Will you be able to discern more of the truth of the world while you are here?"
+}
 
 dance_moves_player = {love.graphics.newImage("player/dance/dance1.png"), love.graphics.newImage("player/dance/dance2.png"), love.graphics.newImage("player/dance/dance3.png")}
 
@@ -104,7 +116,7 @@ function love.keypressed(key, unicode)
 	elseif key=="r" then
 		step = 1
 		loading_screen = true
-		for i = 1, table.getn(drawables) do
+		for i = 1, #drawables do
 			drawables[i].talk = false
 			drawables[i].dialog_index = 0
 		end		
@@ -116,13 +128,14 @@ function love.keypressed(key, unicode)
 end
 
 function love.load()
+
+	love.audio.play(love.audio.newSource("introland.mp3"))
 	
 	oldefont = love.graphics.newFont("roman.ttf", 20)
 	talkfont = love.graphics.newFont("roman.ttf", 30)
 	love.graphics.setFont( oldefont )
 
 	plato_mugshot = love.graphics.newImage("info/plato.png")
-	--love.audio.play(love.audio.newSource("aoeIII.mp3"))
 	
 	ball = Drawable.create(400, 300, "bouncy ball")
 	ball.destx = 0
@@ -198,6 +211,10 @@ function love.load()
 end
 
 function love.update(dt)
+	if plato_screen and not sound then
+		love.audio.play(love.audio.newSource("aoeIII.mp3"))
+		sound = true
+	end
 
 	if love.keyboard.isDown("w") or love.keyboard.isDown("up") then
 		player.draw = player.walkup
@@ -296,16 +313,6 @@ function love.draw()
 		end			
 	end
 	
-	if plato_screen then
-		love.graphics.circle("line", 400, 250, 100)
-		love.graphics.circle("fill", 400, 250, 95)
-		drawInfoPlato()		
-		speak(dialog_list_plato[dialog_plato])		
-	end
-	
-	talkfidgettoggle(aristotle, infoAristotle)
-	talkfidgettoggle(arcesilau, infoArcesilau)
-	talkfidgettoggle(speusippus, infoSpeusippus)	
 	
 	if not loading_screen then
 		for i = 1, #drawables do
@@ -313,6 +320,17 @@ function love.draw()
 			love.graphics.draw(drawables[i].draw, drawables[i].x, drawables[i].y)
 		end	
 	end
+	
+	talkfidgettoggle(aristotle, infoAristotle)
+	talkfidgettoggle(arcesilau, infoArcesilau)
+	talkfidgettoggle(speusippus, infoSpeusippus)
+	
+	if plato_screen then
+		love.graphics.circle("line", 400, 250, 100)
+		love.graphics.circle("fill", 400, 250, 95)
+		drawInfoPlato()		
+		speak(dialog_list_plato[dialog_plato])		
+	end	
 	
 	if count%100 == 0 then
 		player:toggle("stand")
@@ -402,7 +420,8 @@ function talkfidgettoggle(drawable, infotable)
 			drawable:toggle("talk")
 		end
 		speak(drawable.dialog[drawable.dialog_index])
-	elseif count%fidgetdelay==0 then
+		--remove math.random for more continous
+	elseif count%fidgetdelay==0 and math.random(1,3) == 2 then
 		drawable:toggle("stand")
 	end
 
