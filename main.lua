@@ -421,7 +421,7 @@ function talkfidgettoggle(drawable, infotable)
 		end
 		speak(drawable.dialog[drawable.dialog_index])
 		--remove math.random for more continous
-	elseif count%fidgetdelay==0 and math.random(1,3) == 2 then
+	elseif count%fidgetdelay==0 then
 		drawable:toggle("stand")
 	end
 
